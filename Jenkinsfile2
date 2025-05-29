@@ -1,0 +1,62 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                // Checkout the code from your Git repository
+                git url: 'https://github.com/TechGirl-254/jenkins-test-pipeline',
+                branch: 'main'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                script {
+                    // Run your build command (e.g., for a Django project)
+                    sh 'python manage.py collectstatic --noinput' // Collect static files
+                    sh 'python manage.py migrate' // Apply migrations
+                }
+            }
+        }
+
+        stage('Check Database Accessibility') {
+            steps {
+                script {
+                    // Check if the database is accessible
+                    // This can be a simple command to ping the database or run a query
+                    // Adjust the command according to your database setup
+                    sh 'python manage.py dbshell -c "SELECT 1;"' // Example for Django
+                }
+            }
+        }
+
+        stage('Check Server Readiness') {
+            steps {
+                script {
+                    // Ensure the server is running and accessible
+                    // You might want to check if a specific port is open or if a URL responds
+                    def serverURL = "http://your-server-url" // Replace with your server URL
+                    def response = sh(script: "curl -s -o /dev/null -w '%{http_code}' $serverURL", returnStdout: true).trim()
+                    
+                    if (response != '200') {
+                        error "Server is not ready, received HTTP code: ${response}"
+                    } else {
+                        echo "Server is ready, received HTTP code: ${response}"
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            // Notify on success (e.g., email, Slack, etc.)
+            echo 'Build completed successfully!'
+        }
+        failure {
+            // Handle failure (e.g., notify or clean up)
+            echo 'Build failed!'
+        }
+    }
+}
