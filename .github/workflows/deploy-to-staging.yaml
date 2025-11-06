@@ -1,0 +1,49 @@
+# .github/workflows/cd.yml in charts-alls-well-that-scales-well
+name: Deploy Updated Image to Staging
+
+on:
+  repository_dispatch:
+    types: [deploy-image]
+
+jobs:
+  update-chart:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Get image tag from event
+        run: |
+          echo "IMAGE_TAG=${{ github.event.client_payload.image_tag }}" >> $GITHUB_ENV
+          echo "Using image tag: ${{ github.event.client_payload.image_tag }}"
+
+      - name: Checkout staging repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Create branch and update chart
+        run: |
+          git checkout -b update-image-${{ env.IMAGE_TAG }}
+          sed -i "s/^tag:.*/tag: ${{ env.IMAGE_TAG }}/" helm-chart/scale-app/values.yaml
+          
+          # Bump chart version
+          CHART_PATH="helm-chart/scale-app/Chart.yaml"
+          OLD_VERSION=$(grep '^version:' $CHART_PATH | awk '{print $2}')
+          NEW_VERSION=$(echo $OLD_VERSION | awk -F. -v OFS=. '{$NF++; print}')
+          sed -i "s/^version:.*/version: $NEW_VERSION/" $CHART_PATH
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "Update image to ${IMAGE_TAG} and bump chart version"
+          git push origin update-image-${IMAGE_TAG}
+
+      - name: Open Pull Request to staging main
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+          title: "Deploy image ${IMAGE_TAG} to staging"
+          body: "This PR updates the Helm chart to use image tag **${IMAGE_TAG}**."
+          base: main
+          branch: update-image-${IMAGE_TAG}
