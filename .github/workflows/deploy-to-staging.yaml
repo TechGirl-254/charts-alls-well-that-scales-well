@@ -20,6 +20,13 @@ jobs:
         with:
           token: ${{ secrets.PAT_TOKEN }}
 
+      - name: Debug current values.yaml
+        run: |
+          echo "=== Current values.yaml content ==="
+          cat helm-chart/scale-app/values.yaml
+          echo "=== Looking for image section ==="
+          grep -A 5 -B 5 "image:" helm-chart/scale-app/values.yaml || echo "No image section found"
+
       - name: Create branch and update chart
         run: |
           # Check if branch already exists and pull changes if it does
@@ -32,10 +39,18 @@ jobs:
             git checkout -b update-image-${{ env.IMAGE_TAG }}
           fi
           
-          # Update the image tag in values.yaml
-          sed -i "s|tag: latest|tag: ${{ env.IMAGE_TAG }}|" helm-chart/scale-app/values.yaml
-          echo "Updated values.yaml:"
-          cat helm-chart/scale-app/values.yaml | grep -A 2 -B 2 "tag:"
+          # Debug again after checkout
+          echo "=== values.yaml after branch checkout ==="
+          cat helm-chart/scale-app/values.yaml
+
+          # More flexible update of image tag in values.yaml
+          echo "Updating image tag to: ${{ env.IMAGE_TAG }}"
+          sed -i "s|tag:.*|tag: ${{ env.IMAGE_TAG }}|" helm-chart/scale-app/values.yaml
+          
+          echo "=== values.yaml after update ==="
+          cat helm-chart/scale-app/values.yaml
+          echo "=== Image section after update ==="
+          grep -A 5 -B 5 "image:" helm-chart/scale-app/values.yaml
           
           # Bump chart version
           CHART_PATH="helm-chart/scale-app/Chart.yaml"
@@ -43,6 +58,13 @@ jobs:
           NEW_VERSION=$(echo $OLD_VERSION | awk -F. -v OFS=. '{$NF++; print}')
           sed -i "s/^version:.*/version: $NEW_VERSION/" $CHART_PATH
           echo "Bumped chart version from $OLD_VERSION to $NEW_VERSION"
+
+      - name: Show changes made
+        run: |
+          echo "=== Files changed ==="
+          git status
+          echo "=== Diff ==="
+          git diff || echo "No diff available"
 
       - name: Commit and push changes
         run: |
@@ -61,7 +83,7 @@ jobs:
             This PR updates the Helm chart to use the new image tag **${{ env.IMAGE_TAG }}**.
             
             Changes:
-            - Updated image tag in values.yaml from `latest` to `${{ env.IMAGE_TAG }}`
+            - Updated image tag in values.yaml to `${{ env.IMAGE_TAG }}`
             - Bumped chart version for the new deployment
           base: main
           branch: update-image-${{ env.IMAGE_TAG }}
