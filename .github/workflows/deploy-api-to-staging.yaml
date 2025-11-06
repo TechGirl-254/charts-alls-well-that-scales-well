@@ -2,7 +2,7 @@ name: Deploy Updated API Image to Staging
 
 on:
   repository_dispatch:
-    types: [deploy-image]
+    types: [deploy-api-image]
 
 jobs:
   update-chart:
@@ -18,7 +18,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.PAT_TOKEN }}
-          
+
       - name: Update image tag and bump chart version
         run: |
           # Update image tag in values.yaml
