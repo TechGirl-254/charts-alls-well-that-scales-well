@@ -57,7 +57,7 @@ jobs:
           echo "=== Files changed ==="
           git diff --name-only
 
-            - name: Commit and push changes
+      - name: Commit and push changes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
