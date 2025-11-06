@@ -1,4 +1,4 @@
 apiVersion: v2
 name: scale-app
 description: Scale App Demo
-version: 0.1.2
+version: 0.1.3

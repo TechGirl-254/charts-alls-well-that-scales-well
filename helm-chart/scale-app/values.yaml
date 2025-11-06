@@ -2,10 +2,10 @@ serviceName: scale-app
 replicaCount: 2
 image:
   repository: 018535004264.dkr.ecr.eu-west-1.amazonaws.com/scale
-  tag: pr-11-07f1d173e3177941c0e900420f0ca19e8c2871f8
+  tag: pr-1-9634715e59a421b7f9e7a488369e06bb84208af8
 ui-image:
   ui-repository: 018535004264.dkr.ecr.eu-west-1.amazonaws.com/scale
-  ui-tag: latest
+  ui-tag: pr-1-9634715e59a421b7f9e7a488369e06bb84208af8
 ecrserviceAccount:
   create: true
   automount: true
