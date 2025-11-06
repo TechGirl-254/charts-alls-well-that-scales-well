@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "..fullname" . }}
+  name: {{ include "..fullname" . }}-api
   labels:
     {{- include "..labels" . | nindent 4 }}
 spec:
@@ -17,7 +17,7 @@ spec:
       serviceAccountName: {{ include "..ecrserviceAccountName" . }}
       containers:
         - name: {{ include "..name" . }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ .Values.ui-image.repository }}:{{ .Values.ui-image.tag }}"
           imagePullPolicy: Always
           ports:
             - containerPort: {{ .Values.service.port }}
