@@ -4,8 +4,8 @@ image:
   repository: 018535004264.dkr.ecr.eu-west-1.amazonaws.com/scale
   tag: pr-11-07f1d173e3177941c0e900420f0ca19e8c2871f8
 ui-image:
-  repository: 018535004264.dkr.ecr.eu-west-1.amazonaws.com/scale
-  tag: pr-11-07f1d173e3177941c0e900420f0ca19e8c2871f8
+  ui-repository: 018535004264.dkr.ecr.eu-west-1.amazonaws.com/scale
+  ui-tag: latest
 ecrserviceAccount:
   create: true
   automount: true

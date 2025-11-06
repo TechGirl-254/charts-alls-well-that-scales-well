@@ -17,7 +17,7 @@ spec:
       serviceAccountName: {{ include "..ecrserviceAccountName" . }}
       containers:
         - name: {{ include "..name" . }}
-          image: "{{ .Values.ui-image.repository }}:{{ .Values.ui-image.tag }}"
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: Always
           ports:
             - containerPort: {{ .Values.service.port }}

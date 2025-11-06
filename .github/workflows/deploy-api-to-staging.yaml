@@ -1,0 +1,47 @@
+name: Deploy Updated API Image to Staging
+
+on:
+  repository_dispatch:
+    types: [deploy-image]
+
+jobs:
+  update-chart:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Get image tag from event
+        run: |
+          echo "IMAGE_TAG=${{ github.event.client_payload.image_tag }}" >> $GITHUB_ENV
+          echo "Using image tag: ${{ github.event.client_payload.image_tag }}"
+
+      - name: Checkout staging repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+          
+      - name: Update image tag and bump chart version
+        run: |
+          # Update image tag in values.yaml
+          sed -i "s|tag:.*|tag: ${{ env.IMAGE_TAG }}|" helm-chart/scale-app/values.yaml
+
+          # Bump chart version
+          CHART_PATH="helm-chart/scale-app/Chart.yaml"
+          OLD_VERSION=$(grep '^version:' $CHART_PATH | awk '{print $2}')
+          NEW_VERSION=$(echo $OLD_VERSION | awk -F. -v OFS=. '{$NF++; print}')
+          sed -i "s/^version:.*/version: $NEW_VERSION/" $CHART_PATH
+
+          echo "Updated image tag to ${{ env.IMAGE_TAG }} and bumped chart version from $OLD_VERSION to $NEW_VERSION"
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+          commit-message: "Update image to ${{ env.IMAGE_TAG }} and bump chart version"
+          title: "Deploy image ${{ env.IMAGE_TAG }} to staging"
+          body: |
+            This PR updates the Helm chart to use the new image tag **${{ env.IMAGE_TAG }}**.
+            
+            - Updated image tag in `values.yaml` to `${{ env.IMAGE_TAG }}`
+            - Bumped chart version for deployment
+          base: main
+          branch: update-image-${{ env.IMAGE_TAG }}
