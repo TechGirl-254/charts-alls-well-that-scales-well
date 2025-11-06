@@ -7,13 +7,13 @@ ecrserviceAccount:
   create: true
   automount: true
   annotations:
-    eks.amazonaws.com/role-arn: arn:aws:iam::440124841598:role/beatbnk-staging-ecr-cross-account-access-role
+    eks.amazonaws.com/role-arn: arn:aws:iam::018535004264:role/production-ecr-cross-account-access-role
   name: scale-app-ecr-sa
 esoserviceAccount:
   create: true
   automount: true
   annotations:
-    eks.amazonaws.com/role-arn: arn:aws:iam::440124841598:role/beatbnk-eso-secrets-reader
+    eks.amazonaws.com/role-arn: arn:aws:iam::018535004264:role/production-eso-secrets-reader
   name: eso-secret-reader-sa
   namespace: eso-secrets-reader
 service:
