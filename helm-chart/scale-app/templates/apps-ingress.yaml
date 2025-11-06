@@ -28,4 +28,25 @@ spec:
                 name: {{ include "..fullname" $ }}-service
                 port:
                   number: 8000
+          - path: /duel
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "..fullname" $ }}-service
+                port:
+                  number: 8000
+          - path: /analytics
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "..fullname" $ }}-service
+                port:
+                  number: 8000
+          - path: /submit-user-data
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "..fullname" $ }}-service
+                port:
+                  number: 8000
 {{- end }}
