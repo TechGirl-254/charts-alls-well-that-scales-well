@@ -20,37 +20,26 @@ jobs:
         with:
           token: ${{ secrets.PAT_TOKEN }}
 
-      - name: Debug current values.yaml
+      - name: Debug initial state
         run: |
-          echo "=== Current values.yaml content ==="
+          echo "=== Initial values.yaml ==="
           cat helm-chart/scale-app/values.yaml
-          echo "=== Looking for image section ==="
-          grep -A 5 -B 5 "image:" helm-chart/scale-app/values.yaml || echo "No image section found"
+          echo "=== Initial Chart.yaml ==="
+          cat helm-chart/scale-app/Chart.yaml
 
       - name: Create branch and update chart
         run: |
-          # Check if branch already exists and pull changes if it does
-          if git ls-remote --heads origin update-image-${{ env.IMAGE_TAG }} | grep update-image-${{ env.IMAGE_TAG }}; then
-            echo "Branch exists, checking it out and pulling latest"
-            git checkout update-image-${{ env.IMAGE_TAG }}
-            git pull origin update-image-${{ env.IMAGE_TAG }}
-          else
-            echo "Creating new branch"
-            git checkout -b update-image-${{ env.IMAGE_TAG }}
-          fi
+          # Create new branch (always start fresh)
+          git checkout -b update-image-${{ env.IMAGE_TAG }}
           
-          # Debug again after checkout
-          echo "=== values.yaml after branch checkout ==="
-          cat helm-chart/scale-app/values.yaml
-
-          # More flexible update of image tag in values.yaml
-          echo "Updating image tag to: ${{ env.IMAGE_TAG }}"
+          echo "=== Before update - values.yaml ==="
+          cat helm-chart/scale-app/values.yaml | grep -A 3 -B 3 "image:"
+          
+          # Update the image tag in values.yaml
           sed -i "s|tag:.*|tag: ${{ env.IMAGE_TAG }}|" helm-chart/scale-app/values.yaml
           
-          echo "=== values.yaml after update ==="
-          cat helm-chart/scale-app/values.yaml
-          echo "=== Image section after update ==="
-          grep -A 5 -B 5 "image:" helm-chart/scale-app/values.yaml
+          echo "=== After update - values.yaml ==="
+          cat helm-chart/scale-app/values.yaml | grep -A 3 -B 3 "image:"
           
           # Bump chart version
           CHART_PATH="helm-chart/scale-app/Chart.yaml"
@@ -59,20 +48,24 @@ jobs:
           sed -i "s/^version:.*/version: $NEW_VERSION/" $CHART_PATH
           echo "Bumped chart version from $OLD_VERSION to $NEW_VERSION"
 
-      - name: Show changes made
+      - name: Verify changes
         run: |
-          echo "=== Files changed ==="
+          echo "=== Git status ==="
           git status
-          echo "=== Diff ==="
-          git diff || echo "No diff available"
+          echo "=== Git diff ==="
+          git diff
+          echo "=== Files changed ==="
+          git diff --name-only
 
       - name: Commit and push changes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add .
-          git commit -m "Update image to ${{ env.IMAGE_TAG }} and bump chart version" || echo "No changes to commit"
-          git push origin update-image-${{ env.IMAGE_TAG }}
+          git commit -m "Update image to ${{ env.IMAGE_TAG }} and bump chart version"
+          echo "=== Commit created ==="
+          git log --oneline -n 3
+          git push --force-with-lease origin update-image-${{ env.IMAGE_TAG }}
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
