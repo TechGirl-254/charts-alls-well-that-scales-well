@@ -1,0 +1,29 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "..fullname" . }}-argocd-ingress
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: {{ .Values.argocd.certManager.issuer }}
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+{{- range .Values.argocd.hosts }}
+        - {{ . }}
+{{- end }}
+      secretName: {{ .Values.argocd.tlsSecret }}
+  rules:
+{{- range .Values.argocd.hosts }}
+    - host: {{ . }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: argocd-server
+                port:
+                  number: 443
+{{- end }}

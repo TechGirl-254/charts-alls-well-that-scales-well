@@ -1,0 +1,134 @@
+{{/*
+Global service name for reuse in all helper functions
+*/}}
+{{- define "global.serviceName" -}}
+{{- .Values.serviceName | default "defaultService" | trunc 63 | trimSuffix "-" -}}
+{{- end }}
+
+{{/*
+Expand the name of the service.
+*/}}
+{{- define "..name" -}}
+{{- include "global.serviceName" . -}}
+{{- end }}
+
+{{/*
+Create a default fully qualified app name.
+*/}}
+{{- define "..fullname" -}}
+{{- if .Values.fullnameOverride }}
+{{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
+{{- else }}
+{{- printf "%s-%s" .Release.Name (include "global.serviceName" .) | trunc 63 | trimSuffix "-" }}
+{{- end }}
+{{- end }}
+
+{{/*
+Create chart name and version as used by the chart label.
+*/}}
+{{- define "..chart" -}}
+{{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+{{/*
+Common labels
+*/}}
+{{- define "..labels" -}}
+helm.sh/chart: {{ include "..chart" . }}
+{{ include "..selectorLabels" . }}
+{{- if .Chart.AppVersion }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{- end }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end }}
+
+{{/*
+Selector labels
+*/}}
+{{- define "..selectorLabels" -}}
+app.kubernetes.io/name: {{ include "..name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{/*
+Create the name of the ecr service account to use
+*/}}
+{{- define "..ecrserviceAccountName" -}}
+{{- if .Values.ecrserviceAccount.create }}
+{{- default (include "global.serviceName" .) .Values.ecrserviceAccount.name }}
+{{- else }}
+{{- default "default" .Values.ecrserviceAccount.name }}
+{{- end }}
+{{- end }}
+
+{{/*
+Create the name of the eso service account to use
+*/}}
+{{- define "..esoserviceAccountName" -}}
+{{- if .Values.esoserviceAccount.create }}
+{{- default (include "global.serviceName" .) .Values.esoserviceAccount.name }}
+{{- else }}
+{{- default "default" .Values.esoserviceAccount.name }}
+{{- end }}
+{{- end }}
+
+{{/*
+Return the full name for the Issuer
+*/}}
+{{- define "issuerName" -}}
+{{- if .Values.certManager.issuer.name }}
+{{- .Values.certManager.issuer.name | trunc 63 | trimSuffix "-" }}
+{{- else }}
+{{- include "..fullname" . }}-issuer
+{{- end }}
+{{- end }}
+
+{{/*
+Return the private key secret name
+*/}}
+{{- define "issuerPrivateKeySecret" -}}
+{{- if .Values.certManager.issuer.privateKeySecretName }}
+{{- .Values.certManager.issuer.privateKeySecretName }}
+{{- else }}
+{{- include "issuerName" . }}-private-key
+{{- end }}
+{{- end }}
+
+{{/*
+Return the certificate secret name
+*/}}
+{{- define "certificateSecretName" -}}
+{{- if .Values.certManager.certificate.secretName }}
+{{- .Values.certManager.certificate.secretName }}
+{{- else }}
+{{- include "..fullname" . }}-tls
+{{- end }}
+{{- end }}
+
+{{/*
+Return the certificate Common Name
+*/}}
+{{- define "certificateCommonName" -}}
+{{- if .Values.certManager.certificate.commonName }}
+{{- .Values.certManager.certificate.commonName }}
+{{- else if (and .Values.ingress.enabled (index .Values.ingress.hosts 0)) }}
+{{- (index .Values.ingress.hosts 0).host }}
+{{- else }}
+example.com
+{{- end }}
+{{- end }}
+
+{{/*
+Return the certificate DNS Names
+*/}}
+{{- define "certificateDNSNames" -}}
+{{- if .Values.certManager.certificate.dnsNames }}
+{{- toYaml .Values.certManager.certificate.dnsNames }}
+{{- else if .Values.ingress.enabled }}
+{{- range .Values.ingress.hosts }}
+- {{ .host }}
+{{- end }}
+{{- else }}
+- example.com
+{{- end }}
+{{- end }}

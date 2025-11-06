@@ -1,0 +1,83 @@
+serviceName: scale-app
+replicaCount: 2
+image:
+  repository: 018535004264.dkr.ecr.eu-west-1.amazonaws.com/scale
+  tag: latest
+ecrserviceAccount:
+  create: true
+  automount: true
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::440124841598:role/beatbnk-staging-ecr-cross-account-access-role
+  name: scale-app-ecr-sa
+esoserviceAccount:
+  create: true
+  automount: true
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::440124841598:role/beatbnk-eso-secrets-reader
+  name: eso-secret-reader-sa
+  namespace: eso-secrets-reader
+service:
+  type: ClusterIP
+  port: 8000
+ingress:
+  enabled: true
+certManager:
+  enabled: true
+  issuer:
+    create: true
+    name: "letsencrypt-prod-issuer"
+    kind: ClusterIssuer
+    email: "developers@beatbnk.com"
+    server: "https://acme-v02.api.letsencrypt.org/directory"
+    privateKeySecretName: "letsencrypt-prod-account-key"
+    solvers:
+      - http01:
+          ingress:
+            class: nginx
+  certificate:
+    create: true
+    secretName: "notifications-service-tls"
+    ingressClassName: "nginx"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    commonName: "stg-notifications-service.beatbnk.com"
+    dnsNames:
+      - "stg-notifications-service.beatbnk.com"
+      - "api-staging.beatbnk.com"
+secretsManager:
+  name: aws-secretsmanager
+  namespace: notifications-service-ns
+  service: SecretsManager
+  region: us-east-1
+externalSecret:
+  name: beatbnk-notifications-service-external-secret
+  namespace: notifications-service-ns
+  refreshInterval: 1h
+  secretStoreRef:
+    name: aws-secretsmanager
+    kind: ClusterSecretStore
+  target:
+    name: beatbnk-notifications-service-secrets
+    creationPolicy: Owner
+  dataFrom:
+    - extract:
+        key: beatbnk-staging-notifications-service-secret
+        # startUpCommand: ["node", "src/index.js"]
+argocd:
+  hosts:
+    - argocd.wamataops.io
+  tlsSecret: argocd-tls
+  certManager:
+    issuer: letsencrypt-prod-issuer
+resources:
+  requests:
+    cpu: "200m"
+    memory: "256Mi"
+  limits:
+    cpu: "500m"
+    memory: "512Mi"
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 50
+other: CWKIyTItXMIIWGpp
