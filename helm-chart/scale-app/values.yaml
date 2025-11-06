@@ -27,7 +27,7 @@ certManager:
     create: true
     name: "letsencrypt-prod-issuer"
     kind: ClusterIssuer
-    email: "developers@beatbnk.com"
+    email: "wammymuriu@gmail.com"
     server: "https://acme-v02.api.letsencrypt.org/directory"
     privateKeySecretName: "letsencrypt-prod-account-key"
     solvers:
@@ -36,35 +36,35 @@ certManager:
             class: nginx
   certificate:
     create: true
-    secretName: "notifications-service-tls"
+    secretName: "scale-app-tls"
     ingressClassName: "nginx"
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    commonName: "stg-notifications-service.beatbnk.com"
+    commonName: "scale-api.wamatamuriu.org"
     dnsNames:
-      - "stg-notifications-service.beatbnk.com"
-      - "api-staging.beatbnk.com"
+      - "scale-ui.wamatamuriu.org"
+      - "scale-api.wamatamuriu.org"
 secretsManager:
   name: aws-secretsmanager
-  namespace: notifications-service-ns
+  namespace: scale-app-ns
   service: SecretsManager
-  region: us-east-1
+  region: eu-west-1
 externalSecret:
-  name: beatbnk-notifications-service-external-secret
-  namespace: notifications-service-ns
+  name: scale-app-external-secret
+  namespace: scale-app-ns
   refreshInterval: 1h
   secretStoreRef:
     name: aws-secretsmanager
     kind: ClusterSecretStore
   target:
-    name: beatbnk-notifications-service-secrets
+    name: scale-app-secret
     creationPolicy: Owner
   dataFrom:
     - extract:
-        key: beatbnk-staging-notifications-service-secret
+        key: scale-app-secret
         # startUpCommand: ["node", "src/index.js"]
 argocd:
   hosts:
-    - argocd.wamataops.io
+    - scale-argocd.wamatamuriu.org
   tlsSecret: argocd-tls
   certManager:
     issuer: letsencrypt-prod-issuer
