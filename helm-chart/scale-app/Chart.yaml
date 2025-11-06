@@ -1,4 +1,4 @@
 apiVersion: v2
-name: wakanda-duel
-description: WakandaOps Duel Demo
+name: scale-app
+description: Scale App Demo
 version: 0.1.1
