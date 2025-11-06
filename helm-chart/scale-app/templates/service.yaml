@@ -4,7 +4,8 @@ metadata:
   name: scale-app-svc
 spec:
   selector:
-    app: scale-app
+    app.kubernetes.io/name: scale-app
+    app.kubernetes.io/instance: scale-app
   ports:
     - protocol: TCP
       port: {{ .Values.service.port }}
