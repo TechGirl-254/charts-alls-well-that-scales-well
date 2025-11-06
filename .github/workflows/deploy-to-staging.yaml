@@ -22,9 +22,17 @@ jobs:
 
       - name: Create branch and update chart
         run: |
-          git checkout -b update-image-${{ env.IMAGE_TAG }}
+          # Check if branch already exists and pull changes if it does
+          if git ls-remote --heads origin update-image-${{ env.IMAGE_TAG }} | grep update-image-${{ env.IMAGE_TAG }}; then
+            echo "Branch exists, checking it out and pulling latest"
+            git checkout update-image-${{ env.IMAGE_TAG }}
+            git pull origin update-image-${{ env.IMAGE_TAG }}
+          else
+            echo "Creating new branch"
+            git checkout -b update-image-${{ env.IMAGE_TAG }}
+          fi
           
-          # Update the image tag in values.yaml - FIXED SED COMMAND
+          # Update the image tag in values.yaml
           sed -i "s|tag: latest|tag: ${{ env.IMAGE_TAG }}|" helm-chart/scale-app/values.yaml
           echo "Updated values.yaml:"
           cat helm-chart/scale-app/values.yaml | grep -A 2 -B 2 "tag:"
@@ -41,7 +49,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add .
-          git commit -m "Update image to ${{ env.IMAGE_TAG }} and bump chart version"
+          git commit -m "Update image to ${{ env.IMAGE_TAG }} and bump chart version" || echo "No changes to commit"
           git push origin update-image-${{ env.IMAGE_TAG }}
 
       - name: Create Pull Request
@@ -51,11 +59,9 @@ jobs:
           title: "Deploy image ${{ env.IMAGE_TAG }} to staging"
           body: |
             This PR updates the Helm chart to use the new image tag **${{ env.IMAGE_TAG }}**.
-
-      - name: Commit and push changes
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add .
-          git commit -m "Update image to ${IMAGE_TAG} and bump chart version"
-          git push origin update-image-${IMAGE_TAG}
+            
+            Changes:
+            - Updated image tag in values.yaml from `latest` to `${{ env.IMAGE_TAG }}`
+            - Bumped chart version for the new deployment
+          base: main
+          branch: update-image-${{ env.IMAGE_TAG }}
