@@ -1,4 +1,4 @@
 apiVersion: v2
 name: wakanda-duel
 description: WakandaOps Duel Demo
-version: 0.1.0
+version: 0.1.1
