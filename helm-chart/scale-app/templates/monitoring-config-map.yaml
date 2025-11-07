@@ -24,7 +24,7 @@ data:
             "targets": [
               {
                 "expr": "rate(http_requests_total{job=\"scale-app-metrics\"}[5m])",
-                "legendFormat": "{{method}} {{handler}}",
+                "legendFormat": "{{ "{{method}} {{handler}}" }}",
                 "refId": "A"
               }
             ],
@@ -41,12 +41,12 @@ data:
             "targets": [
               {
                 "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job=\"scale-app-metrics\"}[5m]))",
-                "legendFormat": "p95 - {{handler}}",
+                "legendFormat": "{{ "p95 - {{handler}}" }}",
                 "refId": "A"
               },
               {
                 "expr": "histogram_quantile(0.99, rate(http_request_duration_seconds_bucket{job=\"scale-app-metrics\"}[5m]))",
-                "legendFormat": "p99 - {{handler}}",
+                "legendFormat": "{{ "p99 - {{handler}}" }}",
                 "refId": "B"
               }
             ],
@@ -184,7 +184,7 @@ data:
             "targets": [
               {
                 "expr": "sum by (handler) (rate(http_requests_total{job=\"scale-app-metrics\"}[5m]))",
-                "legendFormat": "{{handler}}",
+                "legendFormat": "{{ "{{handler}}" }}",
                 "refId": "A"
               }
             ],
@@ -201,7 +201,7 @@ data:
             "targets": [
               {
                 "expr": "sum by (status) (rate(http_requests_total{job=\"scale-app-metrics\"}[5m]))",
-                "legendFormat": "{{status}}",
+                "legendFormat": "{{ "{{status}}" }}",
                 "refId": "A"
               }
             ],
