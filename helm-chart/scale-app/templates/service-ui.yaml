@@ -4,8 +4,8 @@ metadata:
   name: {{ include "..fullname" $ }}-service-ui
 spec:
   selector:
-    app.kubernetes.io/name: scale-app
-    app.kubernetes.io/instance: scale-app
+    matchLabels:
+      {{- include "..selectorLabels" . | nindent 6 }}
   ports:
     - protocol: TCP
       port: 80
