@@ -25,28 +25,28 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: {{ include "..fullname" $ }}-service-api
+                name: {{ include "..fullname" $ }}-service-ui
                 port:
                   number: 80
           - path: /duel
             pathType: Prefix
             backend:
               service:
-                name: {{ include "..fullname" $ }}-service-api
+                name: {{ include "..fullname" $ }}-service-ui
                 port:
                   number: 80
           - path: /analytics
             pathType: Prefix
             backend:
               service:
-                name: {{ include "..fullname" $ }}-service-api
+                name: {{ include "..fullname" $ }}-service-ui
                 port:
                   number: 80
           - path: /submit-user-data
             pathType: Prefix
             backend:
               service:
-                name: {{ include "..fullname" $ }}-service-api
+                name: {{ include "..fullname" $ }}-service-ui
                 port:
                   number: 80
 {{- end }}
