@@ -1,52 +1,13 @@
-apiVersion: networking.k8s.io/v1
-kind: Ingress
+apiVersion: v1
+kind: Service
 metadata:
-  name: {{ include "..fullname" . }}-ingress
-  namespace: {{ .Release.Namespace }}
-  annotations:
-    cert-manager.io/cluster-issuer: {{ .Values.certManager.issuer.name }}
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    kubernetes.io/ingress.class: nginx
-
+  name: {{ include "..fullname" $ }}-service-ui
 spec:
-  ingressClassName: {{ .Values.certManager.certificate.ingressClassName }}
-  tls:
-    - hosts:
-{{- range .Values.certManager.certificate.dnsNames }}
-        - {{ . }}
-{{- end }}
-      secretName: {{ .Values.certManager.certificate.secretName }}
-  rules:
-{{- range .Values.certManager.certificate.dnsNames }}
-    - host: {{ . }}
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: {{ include "..fullname" $ }}-service-ui
-                port:
-                  number: 80
-          - path: /duel
-            pathType: Prefix
-            backend:
-              service:
-                name: {{ include "..fullname" $ }}-service-ui
-                port:
-                  number: 80
-          - path: /analytics
-            pathType: Prefix
-            backend:
-              service:
-                name: {{ include "..fullname" $ }}-service-ui
-                port:
-                  number: 80
-          - path: /submit-user-data
-            pathType: Prefix
-            backend:
-              service:
-                name: {{ include "..fullname" $ }}-service-ui
-                port:
-                  number: 80
-{{- end }}
+  selector:
+    app.kubernetes.io/name: scale-app
+    app.kubernetes.io/instance: scale-app
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: {{ .Values.service.type }}
