@@ -7,9 +7,9 @@ metadata:
     cert-manager.io/cluster-issuer: {{ .Values.certManager.issuer.name }}
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     kubernetes.io/ingress.class: nginx
-    nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
-    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
-    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "10"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
     nginx.ingress.kubernetes.io/proxy-body-size: "10m"
     nginx.ingress.kubernetes.io/enable-cors: "true"
     nginx.ingress.kubernetes.io/cors-allow-origin: "https://scale-ui.wamatamuriu.org"
@@ -18,8 +18,6 @@ metadata:
     nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
     nginx.ingress.kubernetes.io/upstream-keepalive-connections: "100"
     nginx.ingress.kubernetes.io/upstream-keepalive-timeout: "60"
-    nginx.ingress.kubernetes.io/configuration-snippet: |
-      add_header X-Response-Time $request_time;
 
 spec:
   ingressClassName: {{ .Values.certManager.certificate.ingressClassName }}

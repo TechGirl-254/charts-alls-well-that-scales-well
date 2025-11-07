@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: scale-app-ui
+  name: {{ include "..fullname" . }}-ui
   labels:
     app.kubernetes.io/name: scale-app
     app.kubernetes.io/component: ui
