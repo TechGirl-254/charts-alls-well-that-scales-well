@@ -6,7 +6,7 @@ metadata:
     {{- include "..labels" . | nindent 4 }}
 spec:
   selector:
-    {{- include "..uiselectorLabels" . | nindent 4 }}
+    {{- include "..uiSelectorLabels" . | nindent 4 }}
   ports:
     - port: 80
       targetPort: 80
