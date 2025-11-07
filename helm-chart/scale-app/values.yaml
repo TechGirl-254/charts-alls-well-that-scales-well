@@ -1,5 +1,10 @@
 serviceName: scale-app
 replicaCount: 2
+api:
+  fullnameOverride: "" 
+ui:
+  fullnameOverride: "" 
+
 image:
   repository: 018535004264.dkr.ecr.eu-west-1.amazonaws.com/scale
   tag: build-60-4ab46d9e301b480781b9356038d0610a131735cd
