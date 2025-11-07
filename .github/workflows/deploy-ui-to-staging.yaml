@@ -22,7 +22,7 @@ jobs:
       - name: Update image tag and bump chart version
         run: |
           # Update image tag in values.yaml
-          sed -i "s|ui-tag:.*|ui-tag: ${{ env.IMAGE_TAG }}|" helm-chart/scale-app/values.yaml
+          sed -i "s|uiTag:.*|uiTag: ${{ env.IMAGE_TAG }}|" helm-chart/scale-app/values.yaml
 
           echo "Updated image tag to ${{ env.IMAGE_TAG }}"
 
