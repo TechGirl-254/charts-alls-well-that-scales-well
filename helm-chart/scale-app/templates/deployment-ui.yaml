@@ -29,5 +29,5 @@ spec:
               cpu: {{ .Values.resources.limits.cpu }}
               memory: {{ .Values.resources.limits.memory }}
       {{- if .Values.esoserviceAccount.create }}
-        automountServiceAccountToken: true
+      automountServiceAccountToken: true
       {{- end }}
