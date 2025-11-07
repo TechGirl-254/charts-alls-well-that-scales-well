@@ -1,15 +1,14 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "api.fullname" . }}-service
+  name: {{ include "..fullname" . }}-service-ui
   labels:
-    {{- include "api.labels" . | nindent 4 }}
+    {{- include "..labels" . | nindent 4 }}
 spec:
   selector:
-    app.kubernetes.io/name: {{ include "..name" . }}-ui
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "..selectorLabels" . | nindent 4 }}
     app.kubernetes.io/component: ui
   ports:
-    - port: 8000
-      targetPort: 8000
+    - port: 80
+      targetPort: 80
   type: {{ .Values.service.type }}
