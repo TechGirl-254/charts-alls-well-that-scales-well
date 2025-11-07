@@ -53,11 +53,13 @@ app.kubernetes.io/instance: {{ .Release.Name | default "defaultRelease" }}
 {{- define "..apiselectorLabels" -}}
 app.kubernetes.io/name: {{ include "..name" . }}-api
 app.kubernetes.io/instance: {{ .Release.Name }}
+app.kubernetes.io/component: api
 {{- end }}
 
 {{- define "..uiselectorLabels" -}}
 app.kubernetes.io/name: {{ include "..name" . }}-ui
 app.kubernetes.io/instance: {{ .Release.Name }}
+app.kubernetes.io/component: ui
 {{- end }}
 
 {{/*
