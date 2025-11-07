@@ -46,22 +46,9 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 Selector labels
 */}}
 {{- define "..selectorLabels" -}}
-app.kubernetes.io/name: {{ include "..name" . | default "defaultApp" }}
-app.kubernetes.io/instance: {{ .Release.Name | default "defaultRelease" }}
+app.kubernetes.io/name: {{ include "..name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
-
-{{- define "..apiSelectorLabels" -}}
-app.kubernetes.io/name: {{ include "..name" . }}-api
-app.kubernetes.io/instance: {{ .Release.Name | default "defaultrelease" }}
-app.kubernetes.io/component: api
-{{- end }}
-
-{{- define "..uiSelectorLabels" -}}
-app.kubernetes.io/name: {{ include "..name" . }}-ui
-app.kubernetes.io/instance: {{ .Release.Name | default "defaultrelease" }}
-app.kubernetes.io/component: ui
-{{- end }}
-
 
 {{/*
 Create the name of the ecr service account to use

@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: scale-app-config
-  namespace: {{ .Release.Namespace }}
+  namespace: scale-app-ns
 data:
   S3_BUCKET: scale-etl-bucket-1
   MODEL_KEY: models/duel_model.pkl

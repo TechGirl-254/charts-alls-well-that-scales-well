@@ -2,18 +2,17 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "..fullname" . }}-ui
-  namespace: {{ .Release.Namespace }}
   labels:
-{{- include "..labels" . | nindent 4 }}
+    {{- include "..labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-{{- include "..uiSelectorLabels" . | nindent 6 }}
+      {{- include "..selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-{{- include "..uiSelectorLabels" . | nindent 8 }}
+        {{- include "..selectorLabels" . | nindent 8 }}
     spec:
       serviceAccountName: {{ include "..ecrserviceAccountName" . }}
       containers:

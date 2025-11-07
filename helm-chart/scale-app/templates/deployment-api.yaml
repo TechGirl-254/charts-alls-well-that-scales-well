@@ -2,20 +2,20 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "..fullname" . }}-api
-  namespace: {{ .Release.Namespace }}
   labels:
-{{- include "..labels" . | nindent 4 }}
+    {{- include "..labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-{{- include "..apiSelectorLabels" . | nindent 6 }}
+      {{- include "..selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-{{- include "..apiSelectorLabels" . | nindent 8 }}
+        {{- include "..selectorLabels" . | nindent 8 }}
     spec:
       serviceAccountName: {{ include "..s3serviceAccountName" . }}
+
       containers:
         - name: {{ include "..name" . }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -25,11 +25,27 @@ spec:
               name: http
           env:
             - name: S3_BUCKET
-              value: {{ .Values.s3.bucket | quote }}
+              value: "scale-etl-bucket-1"
             - name: MODEL_KEY
-              value: {{ .Values.s3.modelKey | quote }}
+              value: "models/duel_model.pkl"
             - name: AWS_REGION
-              value: {{ .Values.s3.region | quote }}
+              value: "eu-west-1"
+
+          # ---- Probes ----
+          # readinessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: {{ .Values.service.port }}
+          #   initialDelaySeconds: 5
+          #   periodSeconds: 10
+          #   failureThreshold: 3
+          # livenessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: {{ .Values.service.port }}
+          #   initialDelaySeconds: 15
+          #   periodSeconds: 20
+          #   failureThreshold: 6
           resources:
             requests:
               cpu: {{ .Values.resources.requests.cpu }}
@@ -39,6 +55,7 @@ spec:
               memory: {{ .Values.resources.limits.memory }}
       securityContext:
         fsGroup: 1000
+
       {{- if .Values.s3serviceAccount.create }}
       automountServiceAccountToken: {{ .Values.s3serviceAccount.automount }}
       {{- end }}
