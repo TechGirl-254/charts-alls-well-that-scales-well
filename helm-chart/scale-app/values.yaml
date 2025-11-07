@@ -5,7 +5,7 @@ image:
   tag: build-60-4ab46d9e301b480781b9356038d0610a131735cd
 uiImage:
   uiRepository: 018535004264.dkr.ecr.eu-west-1.amazonaws.com/scale
-  uiTag: pr-4-b279f3a49cdc475f5a8a4f734c08c4d26bf88b49
+  uiTag: pr-4-6e971d6d352082559b49d68e29d5591083557d46
 ecrserviceAccount:
   create: true
   automount: true
