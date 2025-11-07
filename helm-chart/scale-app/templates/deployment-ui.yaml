@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "..fullname" . }}-ui
+  name: {{ include "ui.fullname" . }}-ui
   labels:
     {{- include "ui.labels" . | nindent 4 }}
 spec:
@@ -12,7 +12,7 @@ spec:
   template:
     metadata:
       labels:
-        {{- include "ui.selectorLabels" . | nindent 8 }}
+        {{- include "ui.selectorLabels" . | nindent 6 }}
     spec:
       serviceAccountName: {{ include "..ecrserviceAccountName" . }}
       containers:
