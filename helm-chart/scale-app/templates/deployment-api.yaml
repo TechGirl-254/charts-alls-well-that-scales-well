@@ -1,18 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "api.fullname" . }}-api
+  name: {{ include "api.fullname" . }}
   labels:
     {{- include "api.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      {{- include "api.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/name: {{ include "..name" . }}-api
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: api
   template:
     metadata:
       labels:
-        {{- include "api.selectorLabels" . | nindent 6 }}
+        app.kubernetes.io/name: {{ include "..name" . }}-api
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: api
     spec:
       serviceAccountName: {{ include "..s3serviceAccountName" . }}
       containers:

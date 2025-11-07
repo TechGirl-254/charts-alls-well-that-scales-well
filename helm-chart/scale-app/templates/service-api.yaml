@@ -6,7 +6,9 @@ metadata:
     {{- include "api.labels" . | nindent 4 }}
 spec:
   selector:
-    {{- include "api.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/name: {{ include "..name" . }}-api
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: api
   ports:
     - port: 8000
       targetPort: 8000

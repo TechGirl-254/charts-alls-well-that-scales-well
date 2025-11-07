@@ -73,7 +73,7 @@ API-specific labels (includes common labels + API selector labels)
 */}}
 {{- define "api.labels" -}}
 helm.sh/chart: {{ include "..chart" . }}
-{{ include "api.selectorLabels" . }}
+{{ include "api.selectorLabels" . | nindent 0 }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -85,7 +85,7 @@ UI-specific labels (includes common labels + UI selector labels)
 */}}
 {{- define "ui.labels" -}}
 helm.sh/chart: {{ include "..chart" . }}
-{{ include "ui.selectorLabels" . }}
+{{ include "ui.selectorLabels" . | nindent 0 }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
