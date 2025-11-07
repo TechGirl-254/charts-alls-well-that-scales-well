@@ -14,13 +14,38 @@ spec:
       labels:
         {{- include "..selectorLabels" . | nindent 8 }}
     spec:
-      serviceAccountName: {{ include "..ecrserviceAccountName" . }}
+      serviceAccountName: {{ include "..s3serviceAccountName" . }}
+
       containers:
         - name: {{ include "..name" . }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: Always
           ports:
             - containerPort: {{ .Values.service.port }}
+              name: http
+          env:
+            - name: S3_BUCKET
+              value: "scale-etl-bucket-1"
+            - name: MODEL_KEY
+              value: "models/duel_model.pkl"
+            - name: AWS_REGION
+              value: "eu-west-1"
+
+          # ---- Probes ----
+          # readinessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: {{ .Values.service.port }}
+          #   initialDelaySeconds: 5
+          #   periodSeconds: 10
+          #   failureThreshold: 3
+          # livenessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: {{ .Values.service.port }}
+          #   initialDelaySeconds: 15
+          #   periodSeconds: 20
+          #   failureThreshold: 6
           resources:
             requests:
               cpu: {{ .Values.resources.requests.cpu }}
@@ -28,6 +53,9 @@ spec:
             limits:
               cpu: {{ .Values.resources.limits.cpu }}
               memory: {{ .Values.resources.limits.memory }}
-      {{- if .Values.esoserviceAccount.create }}
-      automountServiceAccountToken: true
+      securityContext:
+        fsGroup: 1000
+
+      {{- if .Values.s3serviceAccount.create }}
+      automountServiceAccountToken: {{ .Values.s3serviceAccount.automount }}
       {{- end }}

@@ -12,6 +12,12 @@ ecrserviceAccount:
   annotations:
     eks.amazonaws.com/role-arn: arn:aws:iam::018535004264:role/production-ecr-cross-account-access-role
   name: scale-app-ecr-sa
+s3serviceAccount:
+  create: true
+  automount: true
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::018535004264:role/production-s3-access-role
+  name: scale-app-s3-sa
 esoserviceAccount:
   create: true
   automount: true

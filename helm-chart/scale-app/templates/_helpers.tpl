@@ -62,6 +62,17 @@ Create the name of the ecr service account to use
 {{- end }}
 
 {{/*
+Create the name of the s3 service account to use
+*/}}
+{{- define "..s3serviceAccountName" -}}
+{{- if .Values.s3serviceAccount.create }}
+{{- default (include "global.serviceName" .) .Values.s3serviceAccount.name }}
+{{- else }}
+{{- default "default" .Values.s3serviceAccount.name }}
+{{- end }}
+{{- end }}
+
+{{/*
 Create the name of the eso service account to use
 */}}
 {{- define "..esoserviceAccountName" -}}
