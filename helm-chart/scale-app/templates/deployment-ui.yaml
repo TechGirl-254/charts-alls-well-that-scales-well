@@ -8,11 +8,11 @@ spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      {{- include "..uiselectorLabels" . | nindent 6 }}
+      {{- include "..uiSelectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "..uiselectorLabels" . | nindent 6 }}
+        {{- include "..uiSelectorLabels" . | nindent 8 }}
     spec:
       serviceAccountName: {{ include "..ecrserviceAccountName" . }}
       containers:

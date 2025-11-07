@@ -8,14 +8,13 @@ spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      {{- include "..apiselectorLabels" . | nindent 6 }}
+      {{- include "..apiSelectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "..apiselectorLabels" . | nindent 6 }}
+        {{- include "..apiSelectorLabels" . | nindent 8 }}
     spec:
       serviceAccountName: {{ include "..s3serviceAccountName" . }}
-
       containers:
         - name: {{ include "..name" . }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -30,22 +29,6 @@ spec:
               value: "models/duel_model.pkl"
             - name: AWS_REGION
               value: "eu-west-1"
-
-          # ---- Probes ----
-          # readinessProbe:
-          #   httpGet:
-          #     path: /
-          #     port: {{ .Values.service.port }}
-          #   initialDelaySeconds: 5
-          #   periodSeconds: 10
-          #   failureThreshold: 3
-          # livenessProbe:
-          #   httpGet:
-          #     path: /
-          #     port: {{ .Values.service.port }}
-          #   initialDelaySeconds: 15
-          #   periodSeconds: 20
-          #   failureThreshold: 6
           resources:
             requests:
               cpu: {{ .Values.resources.requests.cpu }}
@@ -55,7 +38,6 @@ spec:
               memory: {{ .Values.resources.limits.memory }}
       securityContext:
         fsGroup: 1000
-
       {{- if .Values.s3serviceAccount.create }}
       automountServiceAccountToken: {{ .Values.s3serviceAccount.automount }}
       {{- end }}
