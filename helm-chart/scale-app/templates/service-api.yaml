@@ -4,8 +4,7 @@ metadata:
   name: {{ include "..fullname" $ }}-service-api
 spec:
   selector:
-    matchLabels:
-      {{- include "..selectorLabels" . | nindent 6 }}
+    {{- include "..selectorLabels" . | nindent 4 }}
   ports:
     - protocol: TCP
       port: {{ .Values.service.port }}
