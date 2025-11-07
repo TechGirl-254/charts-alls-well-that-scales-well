@@ -3,16 +3,16 @@ kind: Deployment
 metadata:
   name: {{ include "..fullname" . }}-api
   labels:
-    {{- include "api.labels" . | nindent 4 }}
+    {{- include "..labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      {{- include "api.selectorLabels" . | nindent 6 }}
+      {{- include "..selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "api.selectorLabels" . | nindent 6 }}
+        {{- include "..selectorLabels" . | nindent 6 }}
     spec:
       serviceAccountName: {{ include "..s3serviceAccountName" . }}
 
