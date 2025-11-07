@@ -1,0 +1,366 @@
+---
+# Source: scale-app/templates/ecr-serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: scale-app-ecr-sa
+  namespace: default
+  annotations:
+    eks.amazonaws.com/role-arn: "arn:aws:iam::440124841598:role/beatbnk-staging-ecr-cross-account-access-role"
+    eks.amazonaws.com/role-arn: arn:aws:iam::018535004264:role/production-ecr-cross-account-access-role
+automountServiceAccountToken: true
+---
+# Source: scale-app/templates/eso-serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: eso-secret-reader-sa
+  namespace: default
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::018535004264:role/production-eso-secrets-reader
+automountServiceAccountToken: true
+---
+# Source: scale-app/templates/s3-serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: scale-app-s3-sa
+  namespace: default
+  annotations:
+    eks.amazonaws.com/role-arn: "arn:aws:iam::018535004264:role/production-s3-access-role"
+    eks.amazonaws.com/role-arn: arn:aws:iam::018535004264:role/production-s3-access-role
+automountServiceAccountToken: true
+---
+# Source: scale-app/templates/config-map.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: scale-app-config
+  namespace: scale-app-ns
+data:
+  S3_BUCKET: scale-etl-bucket-1
+  MODEL_KEY: models/duel_model.pkl
+  AWS_REGION: eu-west-1
+---
+# Source: scale-app/templates/role-and-role-binding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: argocd-application-controller-cluster-role-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin   
+subjects:
+  - kind: ServiceAccount
+    name: argocd-application-controller
+    namespace: scale-app-ns
+---
+# Source: scale-app/templates/service-api.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: release-name-scale-app-service-api
+  labels:
+    helm.sh/chart: scale-app-0.1.4
+    app.kubernetes.io/name: scale-app
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/managed-by: Helm
+spec:
+  selector:
+    app.kubernetes.io/name: scale-app-api
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/component: api
+  ports:
+    - port: 8000
+      targetPort: 8000
+      protocol: TCP
+      name: http
+  type: ClusterIP
+---
+# Source: scale-app/templates/service-ui.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: release-name-scale-app-service-ui
+  labels:
+    helm.sh/chart: scale-app-0.1.4
+    app.kubernetes.io/name: scale-app
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/managed-by: Helm
+spec:
+  selector:
+    app.kubernetes.io/name: scale-app-ui
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/component: ui
+  ports:
+    - port: 8000
+      targetPort: 8000
+      protocol: TCP
+      name: http
+  type: ClusterIP
+---
+# Source: scale-app/templates/deployment-api.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: release-name-scale-app-api
+  labels:
+    helm.sh/chart: scale-app-0.1.4
+    app.kubernetes.io/name: scale-app
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: scale-app-api
+      app.kubernetes.io/instance: release-name
+      app.kubernetes.io/component: api
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: scale-app-api
+        app.kubernetes.io/instance: release-name
+        app.kubernetes.io/component: api
+    spec:
+      serviceAccountName: scale-app-s3-sa
+      containers:
+        - name: scale-app
+          image: "018535004264.dkr.ecr.eu-west-1.amazonaws.com/scale:build-60-4ab46d9e301b480781b9356038d0610a131735cd"
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+              name: http
+          env:
+            - name: S3_BUCKET
+              value: 
+            - name: MODEL_KEY
+              value: "models/duel_model.pkl"
+            - name: AWS_REGION
+              value: "eu-west-1"
+          resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+      securityContext:
+        fsGroup: 1000
+      automountServiceAccountToken: true
+---
+# Source: scale-app/templates/deployment-ui.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: release-name-scale-app-ui
+  labels:
+    helm.sh/chart: scale-app-0.1.4
+    app.kubernetes.io/name: scale-app
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: scale-app-ui
+      app.kubernetes.io/instance: release-name
+      app.kubernetes.io/component: ui
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: scale-app-ui
+        app.kubernetes.io/instance: release-name
+        app.kubernetes.io/component: ui
+    spec:
+      serviceAccountName: scale-app-ecr-sa
+      containers:
+        - name: scale-app
+          image: "018535004264.dkr.ecr.eu-west-1.amazonaws.com/scale:pr-4-6e971d6d352082559b49d68e29d5591083557d46"
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+      automountServiceAccountToken: true
+---
+# Source: scale-app/templates/hpa.yaml
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: release-name-scale-app-hpa
+  namespace: default
+  labels:
+        helm.sh/chart: scale-app-0.1.4
+        app.kubernetes.io/name: scale-app
+        app.kubernetes.io/instance: release-name
+        app.kubernetes.io/managed-by: Helm
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: release-name-scale-app
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 50
+---
+# Source: scale-app/templates/apps-ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: release-name-scale-app-ingress-api
+  namespace: default
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod-issuer
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    kubernetes.io/ingress.class: nginx
+
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - scale-api.wamatamuriu.org
+      secretName: scale-app-tls
+  rules:
+    - host: scale-api.wamatamuriu.org
+      http:
+        paths:
+          - path: /duel
+            pathType: Prefix
+            backend:
+              service:
+                name: release-name-scale-app-service-api
+                port:
+                  number: 8000
+          - path: /analytics
+            pathType: Prefix
+            backend:
+              service:
+                name: release-name-scale-app-service-api
+                port:
+                  number: 8000
+          - path: /submit-user-data
+            pathType: Prefix
+            backend:
+              service:
+                name: release-name-scale-app-service-api
+                port:
+                  number: 8000
+---
+# Source: scale-app/templates/argocd-ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: release-name-scale-app-argocd-ingress
+  namespace: default
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod-issuer
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - scale-argocd.wamatamuriu.org
+      secretName: argocd-tls
+  rules:
+    - host: scale-argocd.wamatamuriu.org
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: argocd-server
+                port:
+                  number: 443
+---
+# Source: scale-app/templates/ui-ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: release-name-scale-app-ingress-ui
+  namespace: default
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod-issuer
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    kubernetes.io/ingress.class: nginx
+
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - scale-ui.wamatamuriu.org
+      secretName: scale-ui-tls
+  rules:
+    - host: scale-ui.wamatamuriu.org
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: release-name-scale-app-service-ui
+                port:
+                  number: 80
+---
+# Source: scale-app/templates/cluster-issuer.yaml
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod-issuer
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: wammymuriu@gmail.com
+    privateKeySecretRef:
+      name: letsencrypt-prod-account-key
+    solvers:
+    - http01:
+        ingress:
+          class: nginx
+---
+# Source: scale-app/templates/secretstore-sm.yaml
+apiVersion: external-secrets.io/v1
+kind: ClusterSecretStore
+metadata:
+  name: aws-secretsmanager
+  namespace: scale-app-ns
+spec:
+  provider:
+    aws:
+      service: SecretsManager
+      region: eu-west-1
+      auth:
+        jwt:
+          serviceAccountRef:
+            name: eso-secret-reader-sa
+---
+# Source: scale-app/templates/external-secrets.yaml
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: scale-app-external-secret
+  namespace: scale-app-ns
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    name: aws-secretsmanager
+    kind: ClusterSecretStore
+  target:
+    name: scale-app-secret
+    creationPolicy: Owner
+  dataFrom:
+    - extract:
+        key: scale-app-secret

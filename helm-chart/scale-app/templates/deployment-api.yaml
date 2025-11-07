@@ -3,16 +3,16 @@ kind: Deployment
 metadata:
   name: {{ include "..fullname" . }}-api
   labels:
-    {{- include "..labels" . | nindent 4 }}
+{{- include "..labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      {{- include "..apiSelectorLabels" . | nindent 6 }}
+{{- include "..apiSelectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "..apiSelectorLabels" . | nindent 8 }}
+{{- include "..apiSelectorLabels" . | nindent 8 }}
     spec:
       serviceAccountName: {{ include "..s3serviceAccountName" . }}
       containers:
@@ -24,11 +24,11 @@ spec:
               name: http
           env:
             - name: S3_BUCKET
-              value: "scale-etl-bucket-1"
+              value: {{ .Values.s3.bucket | quote }}
             - name: MODEL_KEY
-              value: "models/duel_model.pkl"
+              value: {{ .Values.s3.modelKey | quote }}
             - name: AWS_REGION
-              value: "eu-west-1"
+              value: {{ .Values.s3.region | quote }}
           resources:
             requests:
               cpu: {{ .Values.resources.requests.cpu }}

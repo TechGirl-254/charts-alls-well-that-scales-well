@@ -101,4 +101,8 @@ autoscaling:
   minReplicas: 2
   maxReplicas: 10
   targetCPUUtilizationPercentage: 50
+s3:
+  bucketName: scale-etl-bucket-1
+  region: eu-west-1
+  modelKey: models/duel_model.pkl
 other: CWKIyTItXMIIWGpp

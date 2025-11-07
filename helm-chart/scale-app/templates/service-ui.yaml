@@ -3,11 +3,13 @@ kind: Service
 metadata:
   name: {{ include "..fullname" . }}-service-ui
   labels:
-    {{- include "..labels" . | nindent 4 }}
+{{- include "..labels" . | nindent 4 }}
 spec:
   selector:
-    {{- include "..uiSelectorLabels" . | nindent 4 }}
+{{- include "..uiSelectorLabels" . | nindent 4 }}
   ports:
-    - port: 80
-      targetPort: 80
+    - port: 8000
+      targetPort: {{ .Values.service.port }}
+      protocol: TCP
+      name: http
   type: {{ .Values.service.type }}
