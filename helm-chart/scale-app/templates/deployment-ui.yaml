@@ -3,16 +3,16 @@ kind: Deployment
 metadata:
   name: {{ include "..fullname" . }}-ui
   labels:
-    {{- include "..ui.labels" . | nindent 4 }}
+    {{- include "ui.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      {{- include "..ui.selectorLabels" . | nindent 6 }}
+      {{- include "ui.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "..ui.selectorLabels" . | nindent 8 }}
+        {{- include "ui.selectorLabels" . | nindent 8 }}
     spec:
       serviceAccountName: {{ include "..ecrserviceAccountName" . }}
       containers:
