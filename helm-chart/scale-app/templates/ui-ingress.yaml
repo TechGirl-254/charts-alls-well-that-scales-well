@@ -4,20 +4,20 @@ metadata:
   name: {{ include "..fullname" . }}-ingress-ui
   namespace: {{ .Release.Namespace }}
   annotations:
-    cert-manager.io/cluster-issuer: {{ .Values.certManager.issuer.name }}
+    cert-manager.io/cluster-issuer: {{ .Values.uiCertManager.issuer.name }}
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     kubernetes.io/ingress.class: nginx
 
 spec:
-  ingressClassName: {{ .Values.certManager.certificate.ingressClassName }}
+  ingressClassName: {{ .Values.certManager.uiCertificate.ingressClassName }}
   tls:
     - hosts:
-{{- range .Values.certManager.certificate.dnsNames }}
+{{- range .Values.certManager.uiCertificate.dnsNames }}
         - {{ . }}
 {{- end }}
-      secretName: {{ .Values.certManager.certificate.secretName }}
+      secretName: {{ .Values.certManager.uiCertificate.secretName }}
   rules:
-{{- range .Values.certManager.certificate.dnsNames }}
+{{- range .Values.certManager.uiCertificate.dnsNames }}
     - host: {{ . }}
       http:
         paths:

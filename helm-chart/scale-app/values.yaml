@@ -44,8 +44,15 @@ certManager:
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     commonName: "scale-api.wamatamuriu.org"
     dnsNames:
-      - "scale-ui.wamatamuriu.org"
       - "scale-api.wamatamuriu.org"
+  uiCertificate:
+    create: true
+    secretName: "scale-app-tls"
+    ingressClassName: "nginx"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    commonName: "scale-ui.wamatamuriu.org"
+    dnsNames:
+      - "scale-ui.wamatamuriu.org"
 secretsManager:
   name: aws-secretsmanager
   namespace: scale-app-ns
