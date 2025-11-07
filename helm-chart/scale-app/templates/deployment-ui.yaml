@@ -8,6 +8,11 @@ metadata:
     app.kubernetes.io/instance: scale-app
 spec:
   replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
   selector:
     matchLabels:
       app.kubernetes.io/name: scale-app
@@ -46,11 +51,11 @@ spec:
             failureThreshold: 3
           resources:
             requests:
-              cpu: {{ .Values.resources.requests.cpu }}
-              memory: {{ .Values.resources.requests.memory }}
+              cpu: {{ .Values.uiResources.requests.cpu }}
+              memory: {{ .Values.uiResources.requests.memory }}
             limits:
-              cpu: {{ .Values.resources.limits.cpu }}
-              memory: {{ .Values.resources.limits.memory }}
+              cpu: {{ .Values.uiResources.limits.cpu }}
+              memory: {{ .Values.uiResources.limits.memory }}
       {{- if .Values.esoserviceAccount.create }}
       automountServiceAccountToken: true
       {{- end }}

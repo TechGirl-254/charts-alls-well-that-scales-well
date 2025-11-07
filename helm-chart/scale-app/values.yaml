@@ -96,6 +96,13 @@ resources:
   limits:
     cpu: "500m"
     memory: "512Mi"
+uiResources:
+  requests:
+    cpu: "100m"
+    memory: "128Mi"
+  limits:
+    cpu: "300m"
+    memory: "256Mi"
 autoscaling:
   enabled: true
   minReplicas: 2
