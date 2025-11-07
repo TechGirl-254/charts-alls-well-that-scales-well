@@ -50,17 +50,18 @@ app.kubernetes.io/name: {{ include "..name" . | default "defaultApp" }}
 app.kubernetes.io/instance: {{ .Release.Name | default "defaultRelease" }}
 {{- end }}
 
-{{- define "..apiselectorLabels" -}}
+{{- define "..apiSelectorLabels" -}}
 app.kubernetes.io/name: {{ include "..name" . }}-api
-app.kubernetes.io/instance: {{ .Release.Name }}
+app.kubernetes.io/instance: {{ .Release.Name | default "defaultrelease" }}
 app.kubernetes.io/component: api
 {{- end }}
 
-{{- define "..uiselectorLabels" -}}
+{{- define "..uiSelectorLabels" -}}
 app.kubernetes.io/name: {{ include "..name" . }}-ui
-app.kubernetes.io/instance: {{ .Release.Name }}
+app.kubernetes.io/instance: {{ .Release.Name | default "defaultrelease" }}
 app.kubernetes.io/component: ui
 {{- end }}
+
 
 {{/*
 Create the name of the ecr service account to use
