@@ -1,33 +1,37 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "..fullname" . }}-ui
+  name: scale-app-ui
   labels:
-    {{- include "..labels" . | nindent 4 }}
+    app.kubernetes.io/name: scale-app
+    app.kubernetes.io/component: ui
+    app.kubernetes.io/instance: scale-app
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: 2
   selector:
     matchLabels:
-      {{- include "..selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/name: scale-app
+      app.kubernetes.io/component: ui
+      app.kubernetes.io/instance: scale-app
   template:
     metadata:
       labels:
-        {{- include "..selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/name: scale-app
+        app.kubernetes.io/component: ui
+        app.kubernetes.io/instance: scale-app
     spec:
-      serviceAccountName: {{ include "..ecrserviceAccountName" . }}
+      serviceAccountName: scale-app-ecr-sa
       containers:
-        - name: {{ include "..name" . }}
-          image: "{{ .Values.uiImage.uiRepository }}:{{ .Values.uiImage.uiTag }}"
+        - name: scale-app-ui
+          image: "018535004264.dkr.ecr.eu-west-1.amazonaws.com/scale:ui-latest"
           imagePullPolicy: Always
           ports:
             - containerPort: 80
           resources:
             requests:
-              cpu: {{ .Values.resources.requests.cpu }}
-              memory: {{ .Values.resources.requests.memory }}
+              cpu: 200m
+              memory: 256Mi
             limits:
-              cpu: {{ .Values.resources.limits.cpu }}
-              memory: {{ .Values.resources.limits.memory }}
-      {{- if .Values.esoserviceAccount.create }}
+              cpu: 500m
+              memory: 512Mi
       automountServiceAccountToken: true
-      {{- end }}

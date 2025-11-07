@@ -1,10 +1,16 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "..fullname" $ }}-service-ui
+  name: scale-app-ui-service
+  labels:
+    app.kubernetes.io/name: scale-app
+    app.kubernetes.io/component: ui
+    app.kubernetes.io/instance: scale-app
 spec:
   selector:
-    {{- include "..selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/name: scale-app
+    app.kubernetes.io/component: ui
+    app.kubernetes.io/instance: scale-app
   ports:
     - protocol: TCP
       port: 80
