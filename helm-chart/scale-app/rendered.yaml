@@ -6,7 +6,6 @@ metadata:
   name: scale-app-ecr-sa
   namespace: default
   annotations:
-    eks.amazonaws.com/role-arn: "arn:aws:iam::440124841598:role/beatbnk-staging-ecr-cross-account-access-role"
     eks.amazonaws.com/role-arn: arn:aws:iam::018535004264:role/production-ecr-cross-account-access-role
 automountServiceAccountToken: true
 ---
@@ -36,7 +35,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: scale-app-config
-  namespace: scale-app-ns
+  namespace: default
 data:
   S3_BUCKET: scale-etl-bucket-1
   MODEL_KEY: models/duel_model.pkl
@@ -61,6 +60,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: release-name-scale-app-service-api
+  namespace: default
   labels:
     helm.sh/chart: scale-app-0.1.4
     app.kubernetes.io/name: scale-app
@@ -83,6 +83,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: release-name-scale-app-service-ui
+  namespace: default
   labels:
     helm.sh/chart: scale-app-0.1.4
     app.kubernetes.io/name: scale-app
@@ -94,8 +95,8 @@ spec:
     app.kubernetes.io/instance: release-name
     app.kubernetes.io/component: ui
   ports:
-    - port: 8000
-      targetPort: 8000
+    - port: 80
+      targetPort: 80
       protocol: TCP
       name: http
   type: ClusterIP
@@ -105,6 +106,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: release-name-scale-app-api
+  namespace: default
   labels:
     helm.sh/chart: scale-app-0.1.4
     app.kubernetes.io/name: scale-app
@@ -155,6 +157,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: release-name-scale-app-ui
+  namespace: default
   labels:
     helm.sh/chart: scale-app-0.1.4
     app.kubernetes.io/name: scale-app
@@ -352,7 +355,7 @@ apiVersion: external-secrets.io/v1
 kind: ExternalSecret
 metadata:
   name: scale-app-external-secret
-  namespace: scale-app-ns
+  namespace: default
 spec:
   refreshInterval: 1h
   secretStoreRef:
