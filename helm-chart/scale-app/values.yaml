@@ -47,7 +47,7 @@ certManager:
       - "scale-api.wamatamuriu.org"
   uiCertificate:
     create: true
-    secretName: "scale-app-tls"
+    secretName: "scale-ui-tls"
     ingressClassName: "nginx"
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     commonName: "scale-ui.wamatamuriu.org"
